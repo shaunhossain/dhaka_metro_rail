@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.map_route.MapRouteFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.mapbox.mapboxsdk.maps.MapView
+        android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:mapbox_cameraTargetLat="23.8215576"
+        app:mapbox_cameraTargetLng="90.39383"
+        app:mapbox_cameraZoom="7"
+        app:mapbox_foregroundLoadColor="@color/white"
+        app:mapbox_renderTextureMode="true"
+        app:mapbox_renderTextureTranslucentSurface="true"
+        app:mapbox_uiAttribution="false"
+        app:mapbox_uiLogo="false" />
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

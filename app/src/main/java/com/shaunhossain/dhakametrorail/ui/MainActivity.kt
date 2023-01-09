@@ -9,6 +9,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import com.mapbox.mapboxsdk.Mapbox
 import com.shaunhossain.dhakametrorail.R
 import com.shaunhossain.dhakametrorail.databinding.ActivityMainBinding
 
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
+        Mapbox.getInstance(this, null)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
