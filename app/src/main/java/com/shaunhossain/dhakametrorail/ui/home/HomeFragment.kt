@@ -27,8 +27,8 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Handler().postDelayed({
-            findNavController().navigate(R.id.action_homeFragment_to_mapRouteFragment)
-        }, 3000)
+//        Handler().postDelayed({
+//            findNavController().navigate(R.id.action_homeFragment_to_mapRouteFragment)
+//        }, 3000)
     }
 }
