@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.navigation.fragment.findNavController
 import com.shaunhossain.dhakametrorail.R
 import com.shaunhossain.dhakametrorail.databinding.FragmentHomeBinding
@@ -26,6 +27,10 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val feelings = resources.getStringArray(R.array.feelings)
+        val arrayAdapter = ArrayAdapter(requireContext(), R.layout.dropdown_item, feelings)
+        binding.autoCompleteTextView.setAdapter(arrayAdapter)
 
 //        Handler().postDelayed({
 //            findNavController().navigate(R.id.action_homeFragment_to_mapRouteFragment)
