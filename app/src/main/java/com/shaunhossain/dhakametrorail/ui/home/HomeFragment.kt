@@ -1,4 +1,4 @@
-package com.shaunhossain.dhakametrorail.ui.splash
+package com.shaunhossain.dhakametrorail.ui.home
 
 import android.os.Bundle
 import android.os.Handler
@@ -8,17 +8,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.shaunhossain.dhakametrorail.R
+import com.shaunhossain.dhakametrorail.databinding.FragmentHomeBinding
 import com.shaunhossain.dhakametrorail.databinding.FragmentSplashBinding
 
-class SplashFragment : Fragment() {
-    private var _binding: FragmentSplashBinding? = null
+
+class HomeFragment : Fragment() {
+    private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSplashBinding.inflate(inflater, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -26,7 +28,7 @@ class SplashFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         Handler().postDelayed({
-            findNavController().navigate(R.id.action_splashFragment_to_homeFragment)
+            findNavController().navigate(R.id.action_homeFragment_to_mapRouteFragment)
         }, 3000)
     }
 }
