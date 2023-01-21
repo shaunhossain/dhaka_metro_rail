@@ -1,0 +1,226 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Uttara North"
+      },
+      "geometry": {
+        "coordinates": [
+          90.3675225238893,
+          23.869113524211883
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Uttara Center"
+      },
+      "geometry": {
+        "coordinates": [
+          90.3651198108463,
+          23.859751478690796
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Uttara South"
+      },
+      "geometry": {
+        "coordinates": [
+          90.36303764070465,
+          23.84592268002737
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pallabi"
+      },
+      "geometry": {
+        "coordinates": [
+          90.36424129929264,
+          23.82616267310651
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mirpur 11"
+      },
+      "geometry": {
+        "coordinates": [
+          90.36527657801116,
+          23.819099290355226
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mirpur 11"
+      },
+      "geometry": {
+        "coordinates": [
+          90.36818989811047,
+          23.80835716637202
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kazipara"
+      },
+      "geometry": {
+        "coordinates": [
+          90.3719781426708,
+          23.799249341558806
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Shewrapara"
+      },
+      "geometry": {
+        "coordinates": [
+          90.37551070255728,
+          23.79096573608024
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Agargaon"
+      },
+      "geometry": {
+        "coordinates": [
+          90.38005138165693,
+          23.77843888802309
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bijoy sarawni"
+      },
+      "geometry": {
+        "coordinates": [
+          90.38292985490835,
+          23.760732612596456
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Farmgate"
+      },
+      "geometry": {
+        "coordinates": [
+          90.38710610926313,
+          23.75904225073795
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Karwan Bazar"
+      },
+      "geometry": {
+        "coordinates": [
+          90.3927650351871,
+          23.75125829557163
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bangla Motor will remove"
+      },
+      "geometry": {
+        "coordinates": [
+          90.39461475238068,
+          23.745964904486115
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Shahbagh"
+      },
+      "geometry": {
+        "coordinates": [
+          90.39600440814513,
+          23.740079877165314
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dhaka University"
+      },
+      "geometry": {
+        "coordinates": [
+          90.39672556554837,
+          23.731701795904613
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bangladesh secretariat"
+      },
+      "geometry": {
+        "coordinates": [
+          90.40748307192143,
+          23.730013576917372
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+      "name": "Motijheel"
+      },
+      "geometry": {
+        "coordinates": [
+          90.41905370267239,
+          23.728054834438552
+        ],
+        "type": "Point"
+      }
+    }
+  ]
+}
