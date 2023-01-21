@@ -1,6 +1,6 @@
 package com.shaunhossain.dhakametrorail.model.coordinate_model
 
-data class Feature(
+data class CoordinateFeature(
     val geometry: Geometry?,
     val properties: Properties?,
     val type: String?

@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/ic_location_on.xml" value="0.298" />
+        <entry key="app/src/main/res/drawable/ic_metro.xml" value="0.298" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.17426545086119555" />
         <entry key="app/src/main/res/layout/fragment_map_route.xml" value="0.18333333333333332" />
         <entry key="app/src/main/res/layout/fragment_second.xml" value="0.35833333333333334" />
