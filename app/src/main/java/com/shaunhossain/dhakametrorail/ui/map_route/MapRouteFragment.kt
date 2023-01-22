@@ -2,7 +2,7 @@ package com.shaunhossain.dhakametrorail.ui.map_route
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.annotation.SuppressLint
+import android.animation.ValueAnimator
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
@@ -11,14 +11,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.FrameLayout
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.mapbox.geojson.Feature
-import com.mapbox.mapboxsdk.annotations.Icon
 import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.annotations.PolygonOptions
@@ -29,9 +30,8 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
-import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
-import com.mapbox.mapboxsdk.style.expressions.Expression.*
+import com.mapbox.mapboxsdk.plugins.markerview.MarkerView
+import com.mapbox.mapboxsdk.plugins.markerview.MarkerViewManager
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
@@ -52,9 +52,12 @@ class MapRouteFragment : Fragment() {
     private var _binding: FragmentMapRouteBinding? = null
     private val binding get() = _binding!!
 
-    private var mapView: MapView? = null
-    private var mMap: MapboxMap? = null
-    private var style: Style? = null
+    private lateinit var mapView: MapView
+    private lateinit var mMap: MapboxMap
+    private lateinit var style: Style
+    private lateinit var markerViewManager: MarkerViewManager
+    private lateinit var marker: MarkerView
+
 
     var currentLocation: Location? = null
     var fusedLocationProviderClient: FusedLocationProviderClient? = null
@@ -73,18 +76,19 @@ class MapRouteFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mapView?.onCreate(savedInstanceState)
+        mapView.onCreate(savedInstanceState)
         if (!requireContext().hasLocationPermission()) {
             userCurrentLocation()
             throw Exception("No permission")
         }
         userCurrentLocation()
-        mapView?.getMapAsync { map ->
+        mapView.getMapAsync { map ->
             // Set the style after mapView was loaded
             mMap = map
             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
             map.setStyle(STYLE_URL) { it ->
                 style = it
+                markerViewManager = MarkerViewManager(mapView, map)
 
                 try {
                     panToSlopes(map)
@@ -103,32 +107,34 @@ class MapRouteFragment : Fragment() {
                 }
 
                 try {
-                   for (item in getStationList()!!){
-                       Log.d("Station",item?.properties?.name!!)
-                      item.geometry.let { station ->
+                    for (item in getStationList()!!){
+                        Log.d("Station",item?.properties?.name!!)
+                        item.geometry.let { station ->
 
-                          val options: MarkerOptions = MarkerOptions()
-                          options.icon = IconFactory.recreate( "location",
-                              BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!)
-                          options.title = item.properties.name
-                          options.position = LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
-                          options.snippet("this is stack location ");
-                          mMap!!.addMarker(options)
+//                            val options: MarkerOptions = MarkerOptions()
+//                            options.icon = IconFactory.recreate( "location",
+//                                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!)
+//                            options.title = item.properties.name
+//                            options.position = LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
+//                            options.snippet("this is stack location ");
+//                            mMap.addMarker(options)
 
-
-                          val polygonOptions3 = PolygonOptions()
-                          polygonOptions3.fillColor(Color.MAGENTA)
-                          polygonOptions3.strokeColor(Color.BLUE)
-                          polygonOptions3.alpha(1f)
-                          polygonOptions3.addAll(getCirclePoints( LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!), 80.0))
-                          mMap!!.addPolygon(polygonOptions3)
+                            createCustomMarker(LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!))
 
 
-                         // mMap?.addMarker(MarkerOptions().position(LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)).icon(icon))
-                         // mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(currentLocation?.latitude!!, currentLocation?.longitude!!), 15.0))
+                            val polygonOptions3 = PolygonOptions()
+                            polygonOptions3.fillColor(Color.MAGENTA)
+                            polygonOptions3.strokeColor(Color.BLUE)
+                            polygonOptions3.alpha(1f)
+                            polygonOptions3.addAll(getCirclePoints( LatLng(station.coordinates[1]!!, station.coordinates[0]!!), 80.0))
+                            mMap.addPolygon(polygonOptions3)
 
-                      }
-                   }
+
+                            // mMap?.addMarker(MarkerOptions().position(LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)).icon(icon))
+                            // mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(currentLocation?.latitude!!, currentLocation?.longitude!!), 15.0))
+
+                        }
+                    }
                 } catch (e: Exception) {
 
                 }
@@ -136,6 +142,35 @@ class MapRouteFragment : Fragment() {
 
 
         }
+    }
+
+    private fun createCustomMarker(latLng: LatLng) {
+        // create a custom animation marker view
+        val customView = createCustomAnimationView()
+        marker = MarkerView(latLng, customView)
+        marker.let {
+            markerViewManager.addMarker(it)
+        }
+    }
+
+    private fun createCustomAnimationView(): View {
+        val customView = LayoutInflater.from(requireActivity()).inflate(R.layout.marker_view, null)
+        customView.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+        val icon = customView.findViewById<View>(R.id.imageview)
+        val animationView = customView.findViewById<View>(R.id.animation_layout)
+        icon.setOnClickListener { view ->
+            val anim = ValueAnimator.ofInt(animationView.measuredWidth, 350)
+            anim.interpolator = AccelerateDecelerateInterpolator()
+            anim.addUpdateListener { valueAnimator ->
+                val `val` = valueAnimator.animatedValue as Int
+                val layoutParams = animationView.layoutParams
+                layoutParams.width = `val`
+                animationView.layoutParams = layoutParams
+            }
+            anim.duration = 1250
+            anim.start()
+        }
+        return customView
     }
 
 
