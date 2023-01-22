@@ -18,8 +18,10 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.mapbox.geojson.Feature
-import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.annotations.Icon
+import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
+import com.mapbox.mapboxsdk.annotations.PolygonOptions
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -29,12 +31,9 @@ import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
-import com.mapbox.mapboxsdk.plugins.markerview.MarkerView
 import com.mapbox.mapboxsdk.style.expressions.Expression.*
-import com.mapbox.mapboxsdk.style.layers.CircleLayer
 import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.utils.BitmapUtils
@@ -46,6 +45,7 @@ import com.shaunhossain.dhakametrorail.model.route_model.RouteModel
 import com.shaunhossain.dhakametrorail.utils.Constants.STYLE_URL
 import com.shaunhossain.dhakametrorail.utils.hasLocationPermission
 import com.shaunhossain.dhakametrorail.utils.readJSONFromAsset
+import kotlin.math.*
 
 
 class MapRouteFragment : Fragment() {
@@ -105,47 +105,39 @@ class MapRouteFragment : Fragment() {
                 try {
                    for (item in getStationList()!!){
                        Log.d("Station",item?.properties?.name!!)
-                      item?.geometry.let { station ->
-                          addSymbolAnnotation(
-                              mapView!!,
-                              mMap!!,
-                              style!!,
-                              LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!),
-                              item?.properties?.name!!
-                          )
+                      item.geometry.let { station ->
 
-//                          val options: MarkerOptions = MarkerOptions()
-//                          options.title = item.properties.name
-//                          options.position = LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
-//                          options.snippet("this is stack location ");
-//                          map.addMarker(options)
+                          val options: MarkerOptions = MarkerOptions()
+                          options.icon = IconFactory.recreate( "location",
+                              BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!)
+                          options.title = item.properties.name
+                          options.position = LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
+                          options.snippet("this is stack location ");
+                          mMap!!.addMarker(options)
+
+
+                          val polygonOptions3 = PolygonOptions()
+                          polygonOptions3.fillColor(Color.MAGENTA)
+                          polygonOptions3.strokeColor(Color.BLUE)
+                          polygonOptions3.alpha(1f)
+                          polygonOptions3.addAll(getCirclePoints( LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!), 80.0))
+                          mMap!!.addPolygon(polygonOptions3)
+
+
+                         // mMap?.addMarker(MarkerOptions().position(LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)).icon(icon))
+                         // mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(currentLocation?.latitude!!, currentLocation?.longitude!!), 15.0))
 
                       }
                    }
                 } catch (e: Exception) {
 
                 }
-
-//                val circleLayer = CircleLayer("trees-style", "trees-source")
-//                circleLayer.sourceLayer = "street-trees-DC-9gvg5l"
-//                circleLayer.withProperties(
-//                    circleOpacity(0.6f),
-//                    circleColor(Color.parseColor("#ffffff")),
-//                    circleRadius(
-//                        interpolate(
-//                            exponential(1.0f), get("DBH"),
-//                            stop(0, 0f),
-//                            stop(1, 1f),
-//                            stop(110, 11f)
-//                        )
-//                    )
-//                )
-//                style!!.addLayer(circleLayer)
             }
 
 
         }
     }
+
 
     private fun panToSlopes(map: MapboxMap) {
         val latLngBounds = LatLngBounds.Builder()
@@ -228,56 +220,37 @@ class MapRouteFragment : Fragment() {
         style.addLayer(layer)
     }
 
-    private fun addSymbolAnnotation(
-        mapView: MapView,
-        mapboxMap: MapboxMap,
-        style: Style,
-        latLng: LatLng,
-        propertyName: String
-    ) {
-
-        // Add icon to the style
-        addAirplaneImageToStyle(style);
-
-        // Create a SymbolManager.
-        val symbolManager = SymbolManager(mapView, mapboxMap, style)
-
-        // Set non-data-driven properties.
-        symbolManager.iconAllowOverlap = true
-        symbolManager.iconIgnorePlacement = true
-
-        // Create a symbol at the specified location.
-        val symbolOptions = SymbolOptions()
-            .withLatLng(latLng)
-            .withIconImage("location")
-            .withTextField(propertyName)
-            .withIconColor("cyan")
-            .withIconColor("yellow")
-            .withTextOffset(arrayOf(4f,-0.3f))
-            .withIconSize(1.3f)
-
-        // Use the manager to draw the annotations.
-        symbolManager.create(symbolOptions)
-        symbolManager.addClickListener {
-            // Display information
-            Toast.makeText(requireContext(), "Opera house", Toast.LENGTH_LONG).show();
-            true
+    private fun getCirclePoints(position: LatLng, radius: Double): ArrayList<LatLng>? {
+        val degreesBetweenPoints = 10 // change here for shape
+        val numberOfPoints = Math.floor(360 / degreesBetweenPoints.toDouble()).toInt()
+        val distRadians = radius / 6371000.0 // earth radius in meters
+        val centerLatRadians = position.latitude * Math.PI / 180
+        val centerLonRadians = position.longitude * Math.PI / 180
+        val polygons: ArrayList<LatLng> = ArrayList() // array to hold all the points
+        for (index in 0 until numberOfPoints) {
+            val degrees = index * degreesBetweenPoints.toDouble()
+            val degreeRadians = degrees * Math.PI / 180
+            val pointLatRadians = Math.asin(
+                sin(centerLatRadians) * cos(distRadians)
+                        + cos(centerLatRadians) * sin(distRadians) * cos(degreeRadians)
+            )
+            val pointLonRadians = centerLonRadians + Math.atan2(
+                sin(degreeRadians)
+                        * sin(distRadians) * cos(centerLatRadians),
+                cos(distRadians) - sin(centerLatRadians) * sin(pointLatRadians)
+            )
+            val pointLat = pointLatRadians * 180 / Math.PI
+            val pointLon = pointLonRadians * 180 / Math.PI
+            val point = LatLng(pointLat, pointLon)
+            polygons.add(point)
         }
+        // add first point at end to close circle
+        polygons.add(polygons[0])
+        return polygons
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private fun addAirplaneImageToStyle(style: Style) {
-        style.addImage(
-            "location",
-            BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!,
-            true
-        )
-    }
 
     private fun getStationList(): List<CoordinateFeature?>? {
-//        Log.d("stationCoordinate",addStationCoordinate().features)
-//        val stationList: List<CoordinateFeature>
-//        for (item in)
       return addStationCoordinate().features
     }
 
