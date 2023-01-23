@@ -3,24 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="@color/cardview_dark_background"
+    android:clipToPadding="false"
     app:cardCornerRadius="10dp"
     app:cardElevation="5dp"
-    app:cardUseCompatPadding="true"
-    android:layout_height="32dp">
+    app:cardUseCompatPadding="true">
 
-    <ImageView
+    <TextView
         android:id="@+id/imageview"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_alignParentStart="true"
-        app:srcCompat="@drawable/ic_metro"
-        android:padding="4dp"/>
-
-    <FrameLayout
-        android:id="@+id/animation_layout"
-        android:layout_width="0dp"
-        android:layout_toRightOf="@id/imageview"
-        android:layout_height="32dp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"/>
 
 </androidx.cardview.widget.CardView>

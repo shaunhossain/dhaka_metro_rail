@@ -2,25 +2,27 @@ package com.shaunhossain.dhakametrorail.ui.map_route
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.animation.ValueAnimator
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.mapbox.geojson.Feature
-import com.mapbox.mapboxsdk.annotations.PolygonOptions
+import com.mapbox.mapboxsdk.annotations.IconFactory
+import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -34,6 +36,7 @@ import com.mapbox.mapboxsdk.style.layers.LineLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
+import com.mapbox.mapboxsdk.utils.BitmapUtils
 import com.shaunhossain.dhakametrorail.R
 import com.shaunhossain.dhakametrorail.databinding.FragmentMapRouteBinding
 import com.shaunhossain.dhakametrorail.model.coordinate_model.CoordinateFeature
@@ -42,7 +45,8 @@ import com.shaunhossain.dhakametrorail.model.route_model.RouteModel
 import com.shaunhossain.dhakametrorail.utils.Constants.STYLE_URL
 import com.shaunhossain.dhakametrorail.utils.hasLocationPermission
 import com.shaunhossain.dhakametrorail.utils.readJSONFromAsset
-import kotlin.math.*
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 class MapRouteFragment : Fragment() {
@@ -79,6 +83,7 @@ class MapRouteFragment : Fragment() {
             throw Exception("No permission")
         }
         userCurrentLocation()
+        mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             // Set the style after mapView was loaded
             mMap = map
@@ -96,7 +101,7 @@ class MapRouteFragment : Fragment() {
 
                 try {
                     map.cameraPosition = CameraPosition.Builder()
-                        .target(LatLng(currentLocation!!.latitude , currentLocation!!.longitude))
+                        .target(LatLng(currentLocation!!.latitude, currentLocation!!.longitude))
                         .zoom(12.0)
                         .build()
                 } catch (e: Exception) {
@@ -104,31 +109,26 @@ class MapRouteFragment : Fragment() {
                 }
 
                 try {
-                    for (item in getStationList()!!){
-                        Log.d("Station",item?.properties?.name!!)
+                    for (item in getStationList()!!) {
+                        Log.d("Station", item?.properties?.name!!)
                         item.geometry.let { station ->
 
-//                            val options: MarkerOptions = MarkerOptions()
-//                            options.icon = IconFactory.recreate( "location",
-//                                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!)
-//                            options.title = item.properties.name
-//                            options.position = LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
-//                            options.snippet("this is stack location ");
-//                            mMap.addMarker(options)
+                            val options: MarkerOptions = MarkerOptions()
+                            options.icon = IconFactory.recreate( "location",
+                                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!)
+                            options.title = item.properties.name
+                            options.position = LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
+                            options.snippet("this is stack location ");
+                            mMap.addMarker(options)
 
-                            createCustomMarker(LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!))
-
-
-                            val polygonOptions3 = PolygonOptions()
-                            polygonOptions3.fillColor(Color.MAGENTA)
-                            polygonOptions3.strokeColor(Color.BLUE)
-                            polygonOptions3.alpha(1f)
-                            polygonOptions3.addAll(getCirclePoints( LatLng(station.coordinates[1]!!, station.coordinates[0]!!), 80.0))
-                            mMap.addPolygon(polygonOptions3)
-
-
-                            // mMap?.addMarker(MarkerOptions().position(LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)).icon(icon))
-                            // mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(currentLocation?.latitude!!, currentLocation?.longitude!!), 15.0))
+                            createCustomMarker(
+                                LatLng(
+                                    station.coordinates[1]!!,
+                                    station.coordinates[0]!!
+                                ),
+                                item.properties.name
+                            )
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(currentLocation?.latitude!!, currentLocation?.longitude!!), 15.0))
 
                         }
                     }
@@ -141,31 +141,25 @@ class MapRouteFragment : Fragment() {
         }
     }
 
-    private fun createCustomMarker(latLng: LatLng) {
+    private fun createCustomMarker(latLng: LatLng,stationName: String) {
         // create a custom animation marker view
-        val customView = createCustomAnimationView()
+        val customView = createCustomAnimationView(stationName)
         marker = MarkerView(latLng, customView)
         marker.let {
             markerViewManager.addMarker(it)
         }
     }
 
-    private fun createCustomAnimationView(): View {
+    private fun createCustomAnimationView(stationName: String): View {
         val customView = LayoutInflater.from(requireActivity()).inflate(R.layout.marker_view, null)
-        customView.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-        val icon = customView.findViewById<View>(R.id.imageview)
-        val animationView = customView.findViewById<View>(R.id.animation_layout)
-        icon.setOnClickListener { view ->
-            val anim = ValueAnimator.ofInt(animationView.measuredWidth, 350)
-            anim.interpolator = AccelerateDecelerateInterpolator()
-            anim.addUpdateListener { valueAnimator ->
-                val `val` = valueAnimator.animatedValue as Int
-                val layoutParams = animationView.layoutParams
-                layoutParams.width = `val`
-                animationView.layoutParams = layoutParams
-            }
-            anim.duration = 1250
-            anim.start()
+        customView.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+            this.gravity = Gravity.LEFT
+            this.setMargins(0,0,0,0)
+        }
+        val stationThum = customView.findViewById<TextView>(R.id.imageview)
+        stationThum.text = stationName
+        stationThum.setOnClickListener { view ->
+            findNavController().navigate(R.id.action_mapRouteFragment_to_stationDetailsFragment)
         }
         return customView
     }
@@ -223,7 +217,7 @@ class MapRouteFragment : Fragment() {
                                 "type": "LineString",
                                 "coordinates": ${addStationRoute().features?.get(0)?.geometry?.coordinates} }} """
 
-        Log.d("coordinate",addStationRoute().features?.get(0)?.geometry?.coordinates.toString())
+        Log.d("coordinate", addStationRoute().features?.get(0)?.geometry?.coordinates.toString())
 
 
         val parisBoundariesFeature = polygonFeatureJson.let { Feature.fromJson(it) }
@@ -240,7 +234,7 @@ class MapRouteFragment : Fragment() {
                 lineJoin(Property.LINE_JOIN_MITER),
                 lineOpacity(.7f),
                 lineWidth(1f),
-                lineDasharray(arrayOf(2f,2f)),
+                lineDasharray(arrayOf(2f, 2f)),
                 lineCap(Property.LINE_CAP_ROUND),
                 lineJoin(Property.LINE_JOIN_ROUND),
                 lineColor(resources.getColor(R.color.black)),
@@ -283,16 +277,61 @@ class MapRouteFragment : Fragment() {
 
 
     private fun getStationList(): List<CoordinateFeature?>? {
-      return addStationCoordinate().features
+        return addStationCoordinate().features
     }
 
 
     private fun addStationRoute(): RouteModel {
-        return Gson().fromJson(readJSONFromAsset(activity = requireActivity(),"metro_route.json"), RouteModel::class.java)
+        return Gson().fromJson(
+            readJSONFromAsset(activity = requireActivity(), "metro_route.json"),
+            RouteModel::class.java
+        )
     }
 
     private fun addStationCoordinate(): CoordinateModel {
-        return Gson().fromJson(readJSONFromAsset(activity = requireActivity(),"metro_stations.json"), CoordinateModel::class.java)
+        return Gson().fromJson(
+            readJSONFromAsset(
+                activity = requireActivity(),
+                "metro_stations.json"
+            ), CoordinateModel::class.java
+        )
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView.onSaveInstanceState(outState)
     }
 
 }
