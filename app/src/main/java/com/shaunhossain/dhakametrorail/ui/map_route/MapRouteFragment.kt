@@ -45,8 +45,6 @@ import com.shaunhossain.dhakametrorail.model.route_model.RouteModel
 import com.shaunhossain.dhakametrorail.utils.Constants.STYLE_URL
 import com.shaunhossain.dhakametrorail.utils.hasLocationPermission
 import com.shaunhossain.dhakametrorail.utils.readJSONFromAsset
-import kotlin.math.cos
-import kotlin.math.sin
 
 
 class MapRouteFragment : Fragment() {
@@ -82,7 +80,12 @@ class MapRouteFragment : Fragment() {
             userCurrentLocation()
             throw Exception("No permission")
         }
+
+
         userCurrentLocation()
+        bindUserCurrentLocationButton()
+
+
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             // Set the style after mapView was loaded
@@ -114,11 +117,14 @@ class MapRouteFragment : Fragment() {
                         item.geometry.let { station ->
 
                             val options: MarkerOptions = MarkerOptions()
-                            options.icon = IconFactory.recreate( "location",
-                                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!)
-                            options.title = item.properties.name
-                            options.position = LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
-                            options.snippet("this is stack location ");
+                            options.icon = IconFactory.recreate(
+                                "location",
+                                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!
+                            )
+                            options.title = item.properties.station
+                            options.position =
+                                LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
+                            options.snippet(item.properties.address);
                             mMap.addMarker(options)
 
                             createCustomMarker(
@@ -128,7 +134,14 @@ class MapRouteFragment : Fragment() {
                                 ),
                                 item.properties.name
                             )
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(currentLocation?.latitude!!, currentLocation?.longitude!!), 15.0))
+                            mMap.moveCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                    LatLng(
+                                        currentLocation?.latitude!!,
+                                        currentLocation?.longitude!!
+                                    ), 15.0
+                                )
+                            )
 
                         }
                     }
@@ -141,7 +154,31 @@ class MapRouteFragment : Fragment() {
         }
     }
 
-    private fun createCustomMarker(latLng: LatLng,stationName: String) {
+    private fun bindUserCurrentLocationButton() {
+        binding.currentLocationButton.setOnClickListener {
+            userCurrentLocation()
+
+            try {
+                updateCameraPosition(
+                    LatLng(
+                        currentLocation!!.latitude,
+                        currentLocation!!.longitude
+                    ), 14.0
+                )
+
+
+                val options: MarkerOptions = MarkerOptions()
+                options.position = LatLng(currentLocation!!.latitude, currentLocation!!.longitude)
+                options.snippet("this is stack location ");
+                mMap.addMarker(options)
+
+            } catch (e: Exception) {
+
+            }
+        }
+    }
+
+    private fun createCustomMarker(latLng: LatLng, stationName: String) {
         // create a custom animation marker view
         val customView = createCustomAnimationView(stationName)
         marker = MarkerView(latLng, customView)
@@ -154,7 +191,7 @@ class MapRouteFragment : Fragment() {
         val customView = LayoutInflater.from(requireActivity()).inflate(R.layout.marker_view, null)
         customView.layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
             this.gravity = Gravity.LEFT
-            this.setMargins(0,0,0,0)
+            this.setMargins(0, 0, 0, 0)
         }
         val stationThum = customView.findViewById<TextView>(R.id.imageview)
         stationThum.text = stationName
@@ -203,7 +240,6 @@ class MapRouteFragment : Fragment() {
 
         task.addOnSuccessListener { location ->
             if (location != null) {
-                //Log.d("current_location", location.latitude.toString())
                 currentLocation = location
             }
         }
@@ -246,33 +282,12 @@ class MapRouteFragment : Fragment() {
         style.addLayer(layer)
     }
 
-    private fun getCirclePoints(position: LatLng, radius: Double): ArrayList<LatLng>? {
-        val degreesBetweenPoints = 10 // change here for shape
-        val numberOfPoints = Math.floor(360 / degreesBetweenPoints.toDouble()).toInt()
-        val distRadians = radius / 6371000.0 // earth radius in meters
-        val centerLatRadians = position.latitude * Math.PI / 180
-        val centerLonRadians = position.longitude * Math.PI / 180
-        val polygons: ArrayList<LatLng> = ArrayList() // array to hold all the points
-        for (index in 0 until numberOfPoints) {
-            val degrees = index * degreesBetweenPoints.toDouble()
-            val degreeRadians = degrees * Math.PI / 180
-            val pointLatRadians = Math.asin(
-                sin(centerLatRadians) * cos(distRadians)
-                        + cos(centerLatRadians) * sin(distRadians) * cos(degreeRadians)
+    private fun updateCameraPosition(location: LatLng, zoom: Double?) {
+        mMap.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                location, zoom!!
             )
-            val pointLonRadians = centerLonRadians + Math.atan2(
-                sin(degreeRadians)
-                        * sin(distRadians) * cos(centerLatRadians),
-                cos(distRadians) - sin(centerLatRadians) * sin(pointLatRadians)
-            )
-            val pointLat = pointLatRadians * 180 / Math.PI
-            val pointLon = pointLonRadians * 180 / Math.PI
-            val point = LatLng(pointLat, pointLon)
-            polygons.add(point)
-        }
-        // add first point at end to close circle
-        polygons.add(polygons[0])
-        return polygons
+        )
     }
 
 
