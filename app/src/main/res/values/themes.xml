@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.DhakaMetroRail" parent="Base.Theme.DhakaMetroRail" />
+    <style name="ViewStyle">
+        <item name="cornerRadius">5dp</item>
+        <item name="color">#8D5AA8</item>
+    </style>
 </resources>
