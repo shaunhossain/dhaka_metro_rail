@@ -21,13 +21,11 @@ fun formatDate(timestampInMillis: Long): String? {
     return sdf.format(Date(timestampInMillis))
 }
 
-fun readJSONFromAsset(activity: Activity, fileName: String): String? {
+suspend fun readJSONFromAsset(activity: Activity, fileName: String): String? {
     var json: String? = null
     try {
         val  inputStream: InputStream = activity.assets.open(fileName)
         json = inputStream.bufferedReader().use{it.readText()}
-        Log.d("readFromAsset", json)
-
     } catch (ex: Exception) {
         ex.printStackTrace()
         return null

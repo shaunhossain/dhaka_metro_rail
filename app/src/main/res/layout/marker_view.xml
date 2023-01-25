@@ -14,7 +14,7 @@
         android:id="@+id/imageview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"/>
+        android:text="Mirpur 12 Station"
+        android:layout_margin="4dp"/>
 
 </androidx.cardview.widget.CardView>

@@ -16,6 +16,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -45,6 +46,8 @@ import com.shaunhossain.dhakametrorail.model.route_model.RouteModel
 import com.shaunhossain.dhakametrorail.utils.Constants.STYLE_URL
 import com.shaunhossain.dhakametrorail.utils.hasLocationPermission
 import com.shaunhossain.dhakametrorail.utils.readJSONFromAsset
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 
 class MapRouteFragment : Fragment() {
@@ -97,7 +100,9 @@ class MapRouteFragment : Fragment() {
 
                 try {
                     panToSlopes(map)
-                    drawDirectionLine(it)
+                    lifecycleScope.launch{
+                        drawDirectionLine(it)
+                    }
                 } catch (e: Exception) {
 
                 }
@@ -112,39 +117,41 @@ class MapRouteFragment : Fragment() {
                 }
 
                 try {
-                    for (item in getStationList()!!) {
-                        Log.d("Station", item?.properties?.name!!)
-                        item.geometry.let { station ->
+                   lifecycleScope.launch{
+                       for (item in getStationList()!!) {
+                           Log.d("Station", item?.properties?.name!!)
+                           item.geometry.let { station ->
 
-                            val options: MarkerOptions = MarkerOptions()
-                            options.icon = IconFactory.recreate(
-                                "location",
-                                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!
-                            )
-                            options.title = item.properties.station
-                            options.position =
-                                LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
-                            options.snippet(item.properties.address);
-                            mMap.addMarker(options)
+                               val options: MarkerOptions = MarkerOptions()
+                               options.icon = IconFactory.recreate(
+                                   "location",
+                                   BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_metro))!!
+                               )
+                               options.title = item.properties.station
+                               options.position =
+                                   LatLng(station?.coordinates!![1]!!, station.coordinates[0]!!)
+                               options.snippet(item.properties.address);
+                               mMap.addMarker(options)
 
-                            createCustomMarker(
-                                LatLng(
-                                    station.coordinates[1]!!,
-                                    station.coordinates[0]!!
-                                ),
-                                item.properties.name
-                            )
-                            mMap.moveCamera(
-                                CameraUpdateFactory.newLatLngZoom(
-                                    LatLng(
-                                        currentLocation?.latitude!!,
-                                        currentLocation?.longitude!!
-                                    ), 15.0
-                                )
-                            )
+                               createCustomMarker(
+                                   LatLng(
+                                       station.coordinates[1]!!,
+                                       station.coordinates[0]!!
+                                   ),
+                                   item.properties.station.toString()
+                               )
+                               mMap.moveCamera(
+                                   CameraUpdateFactory.newLatLngZoom(
+                                       LatLng(
+                                           currentLocation?.latitude!!,
+                                           currentLocation?.longitude!!
+                                       ), 15.0
+                                   )
+                               )
 
-                        }
-                    }
+                           }
+                       }
+                   }
                 } catch (e: Exception) {
 
                 }
@@ -245,7 +252,7 @@ class MapRouteFragment : Fragment() {
         }
     }
 
-    private fun drawDirectionLine(style: Style) {
+    private suspend fun drawDirectionLine(style: Style) {
         val polygonFeatureJson = """{
                                 "type": "Feature",
                                 "properties": {},
@@ -291,19 +298,19 @@ class MapRouteFragment : Fragment() {
     }
 
 
-    private fun getStationList(): List<CoordinateFeature?>? {
+    private suspend fun getStationList(): List<CoordinateFeature?>? {
         return addStationCoordinate().features
     }
 
 
-    private fun addStationRoute(): RouteModel {
+    private suspend fun addStationRoute(): RouteModel {
         return Gson().fromJson(
             readJSONFromAsset(activity = requireActivity(), "metro_route.json"),
             RouteModel::class.java
         )
     }
 
-    private fun addStationCoordinate(): CoordinateModel {
+    private suspend fun addStationCoordinate(): CoordinateModel {
         return Gson().fromJson(
             readJSONFromAsset(
                 activity = requireActivity(),
