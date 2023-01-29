@@ -90,6 +90,7 @@ dependencies {
     implementation "org.maplibre.gl:android-plugin-annotation-v9:1.0.0"
     implementation "org.maplibre.gl:android-plugin-markerview-v9:1.0.0"
     implementation "org.maplibre.gl:android-sdk-turf:5.9.0"
+    implementation 'org.maplibre.gl:android-plugin-scalebar-v9:1.0.0'
 
     implementation 'com.google.android.gms:play-services-location:21.0.1'
 

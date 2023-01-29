@@ -38,6 +38,8 @@ import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 import com.mapbox.mapboxsdk.utils.BitmapUtils
+import com.mapbox.pluginscalebar.ScaleBarOptions
+import com.mapbox.pluginscalebar.ScaleBarPlugin
 import com.shaunhossain.dhakametrorail.R
 import com.shaunhossain.dhakametrorail.databinding.FragmentMapRouteBinding
 import com.shaunhossain.dhakametrorail.model.coordinate_model.CoordinateFeature
@@ -46,7 +48,6 @@ import com.shaunhossain.dhakametrorail.model.route_model.RouteModel
 import com.shaunhossain.dhakametrorail.utils.Constants.STYLE_URL
 import com.shaunhossain.dhakametrorail.utils.hasLocationPermission
 import com.shaunhossain.dhakametrorail.utils.readJSONFromAsset
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 
@@ -92,6 +93,13 @@ class MapRouteFragment : Fragment() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             // Set the style after mapView was loaded
+            val scaleBarPlugin = ScaleBarPlugin(mapView, map)
+            val scaleBarOptions =
+                ScaleBarOptions(requireContext()).setTextColor(R.color.white).setMetricUnit(true)
+                    .setMarginTop(80f).setMarginLeft(16f)
+            scaleBarPlugin.create(scaleBarOptions)
+            scaleBarPlugin.isEnabled = true
+
             mMap = map
             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
             map.setStyle(STYLE_URL) { it ->
