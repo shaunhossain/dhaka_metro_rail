@@ -20,10 +20,19 @@
         android:id="@+id/mapRouteFragment"
         android:name="com.shaunhossain.dhakametrorail.ui.map_route.MapRouteFragment"
         android:label="fragment_map_route"
-        tools:layout="@layout/fragment_map_route" />
+        tools:layout="@layout/fragment_map_route" >
+        <action
+            android:id="@+id/action_mapRouteFragment_to_stationDetailsFragment"
+            app:destination="@id/stationDetailsFragment" />
+    </fragment>
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.shaunhossain.dhakametrorail.ui.home.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
+    <dialog
+        android:id="@+id/stationDetailsFragment"
+        android:name="com.shaunhossain.dhakametrorail.ui.bottom_sheet.station_details.StationDetailsFragment"
+        android:label="fragment_station_details"
+        tools:layout="@layout/fragment_station_details" />
 </navigation>
